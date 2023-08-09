@@ -81,7 +81,7 @@ export default function PaymentCard() {
         .then((rest) => rest.json())
         // if api call is success check if subscription needs verification
         .then(rest => {
-            const {client_secret,status} = rest;
+            const {client_secret,status,subscriptionId} = rest;
             if(status == 'requires_action')
             {
                 stripe.confirmCardPayment(client_secret)
@@ -93,7 +93,7 @@ export default function PaymentCard() {
                     {
                         // add this transaction in database
                         // state: will contain the billing period and plan prices itself
-                        addSubscriptionDetialsToDatabase(state,result.paymentIntent.id);
+                        addSubscriptionDetialsToDatabase(state,result.paymentIntent.id,subscriptionId);
                         
                     }
                     setLoading(false)

@@ -1,12 +1,16 @@
-import React from 'react'
+import React ,{useContext} from 'react'
 import './plancard.css'
-export default function PlanCard({type,plan,period,amount}) {
+import {AppContext} from "../../utils/AppContext"
+
+export default function PlanCard({type,plan,period,amount,subId}) {
+
+  const {cancelSubscription} = useContext(AppContext)
 
   return (
     <div className='card plan__card' >
         <div className="card__header">
             <div className='header__left'>
-                 <h3>Current Plan Details </h3>
+                 <h3>Current Plan Details</h3>
                  {
                     type==="active" ? <span className='active__badge'>Active</span>
                      : <span className='cancel__badge'>Cancelled</span>
@@ -15,7 +19,9 @@ export default function PlanCard({type,plan,period,amount}) {
             </div>
            
            {
-            type==="active" ? <button> Cancel</button> : null
+            type==="active" ? <button onClick={() => {
+              cancelSubscription(subId)
+            } }> Cancel</button> : null
            }
             
         </div>

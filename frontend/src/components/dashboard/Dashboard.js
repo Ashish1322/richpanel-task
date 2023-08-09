@@ -4,36 +4,12 @@ import { AppContext } from "../../utils/AppContext";
 import PlanCard from "../plan-card/PlanCard";
 export default function Dashboard() {
 
-  const {logout,user,baseUrl,showAlert} = useContext(AppContext)
+  const {logout,user,fetchAllSubscriptions,transactions} = useContext(AppContext)
 
-  // state to store all transactions
-  const [transactions,setTransactions] = useState([])
 
   // fetch all the transaction of the current user
   useEffect(() => {
-    fetch(baseUrl+"/plans/subscriptions",{
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": user.token
-      },
-    })
-    .then(res => res.json())
-    .then(data => {
-      if(data.success)
-      {
-        console.log(transactions)
-        setTransactions(data.subscriptions)
-      }
-      else
-      {
-   
-        showAlert(data.message,true)
-      }
-    })
-    .catch(() => {
-      showAlert("Failed to fetch transactions ",true)
-    })
+    fetchAllSubscriptions()
   })
 
   return (
@@ -72,6 +48,7 @@ export default function Dashboard() {
             {
               transactions.map((item)=>   
               <PlanCard 
+              subId={item.subscriptionId}
               key={item._id} 
               period={item.planDetails.period} 
               type={item.active ? "active" : null} 

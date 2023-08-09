@@ -2,7 +2,7 @@
 const router = require("express").Router()
 
 // importing controllors
-const {fetchAllPlans,startSubscription,storeSubscriptionInformation,getAllSubscriptions} = require("../controllors/plans")
+const {fetchAllPlans,startSubscription,storeSubscriptionInformation,getAllSubscriptions,cancelSubscription} = require("../controllors/plans")
 
 // importing middlewares
 const {isLoggedIn} = require("../middlewares/auth")
@@ -18,5 +18,8 @@ router.post("/add-subscription",isLoggedIn,storeSubscriptionInformation)
 
 // @DESC: It will return all the subscription of the current user
 router.get("/subscriptions",isLoggedIn,getAllSubscriptions)
+
+// @DESC: Method to cancel subscription
+router.post("/cancel/:subsId", isLoggedIn,cancelSubscription )
 
 module.exports = router

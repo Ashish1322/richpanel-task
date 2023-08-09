@@ -57,11 +57,13 @@ const startSubscription = async (req,res) => {
       items: [{ plan: planId}],
       expand: ['latest_invoice.payment_intent']
     });
+   
 
    const status = subscription['latest_invoice']['payment_intent']['status'] 
    const client_secret = subscription['latest_invoice']['payment_intent']['client_secret']
+   const subsId = subscription["id"]
 
-   res.status(200).json({success: true, 'client_secret': client_secret, 'status': status})
+   res.status(200).json({success: true, 'client_secret': client_secret, 'status': status, subscriptionId: subsId})
 
 }
 
@@ -70,11 +72,11 @@ const startSubscription = async (req,res) => {
 // @DESCRIPTION: Add the transaction information in the database
 // @AUTH: Access Token is required
 const storeSubscriptionInformation = (req,res) => {
-   const {planDetails,stripePaymentId} = req.body;
+   const {planDetails,stripePaymentId,subscriptionId} = req.body;
 
    const stripePlanId = StripePlansIds[planDetails.plan][planDetails.period]
 
-   let transaction = new Subscription({planDetails,stripePlanId,user: req.user._id,stripePaymentId})
+   let transaction = new Subscription({planDetails,stripePlanId,user: req.user._id,stripePaymentId,subscriptionId})
 
    transaction.save()
    .then(res => res.status(200).json({success: true, message: "Trasaction Added Successfully"}))
@@ -91,5 +93,50 @@ const getAllSubscriptions = (req,res) => {
    .catch( err => res.status(500).json({success: false, message:err.message}))
 }
 
+// @ENDPOINT: /plans/cancel
+// @METHOD: POST
+// @DESCRIPTION: Cancel the Subscription
+// @AUTH: Access Token is required
+const cancelSubscription =  (req,res) => {
 
-module.exports = {fetchAllPlans,startSubscription, storeSubscriptionInformation,getAllSubscriptions}
+   const subscriptionId  = req.params.subsId;
+
+   console.log(subscriptionId)
+   // find the subscription of given user with given subscriptionId
+   Subscription.findOne({user: req.user._id, subscriptionId})
+   .then( async (subs) => {
+
+      try {
+         // Retrieve subscription details from Stripe
+         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+     
+         // Check if the subscription is already canceled
+         if (subscription.status === 'canceled') {
+           return res.status(400).json({success: false, message: 'Subscription is already canceled.' });
+         }
+     
+         // Cancel the subscription
+         await stripe.subscriptions.update(subscriptionId, {
+           cancel_at_period_end: true,
+         });
+         
+         // if everything is fine then update the database also
+
+         subs.active = false
+         await subs.save();
+         return res.json({ success: true, message: 'Subscription cancellation scheduled.' });
+     
+       } catch (error) {
+         
+         return res.status(500).json({ success: false, message: 'An error occurred while canceling the subscription.' });
+       }
+
+   })
+   .catch( err => res.status(500).json({success: false, message:err.message}))
+
+ 
+
+
+}
+
+module.exports = {fetchAllPlans,startSubscription, storeSubscriptionInformation,getAllSubscriptions,cancelSubscription}

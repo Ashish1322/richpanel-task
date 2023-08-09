@@ -23,6 +23,7 @@ function App() {
 
   // user details states
   const [user,setUser] = useState(null)
+  const [transactions,setTransactions] = useState([])
 
   const baseUrl = "http://localhost:3001"
 
@@ -116,14 +117,14 @@ function App() {
   }
 
   // function to add subscription details in the database. It will be called by PaymentCard Component once the subscription has been verified successfully
-  const addSubscriptionDetialsToDatabase = (planDetails,stripePaymentId) => {
+  const addSubscriptionDetialsToDatabase = (planDetails,stripePaymentId,subscriptionId) => {
     fetch(baseUrl+"/plans/add-subscription",{
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": user.token
       },
-      body: JSON.stringify({planDetails,stripePaymentId})
+      body: JSON.stringify({planDetails,stripePaymentId,subscriptionId})
     })
     .then(() => {
       // once transaction added navigate to dashboard
@@ -133,8 +134,62 @@ function App() {
     .catch(err => showAlert(err.message,true) )
   }
 
+  // method to cancel subscription
+  const cancelSubscription = (subscriptionId) => {
+
+    fetch(baseUrl+"/plans/cancel/"+subscriptionId,{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": user.token
+      }
+    })
+    .then(res => res.json())
+    .then((data) => {
+      // once transaction added navigate to dashboard
+      if(data.success){
+        fetchAllSubscriptions() // refresh subscriptions
+        showAlert("Subscription Cancelled !",false)
+      }
+      else
+      {
+        showAlert(data.message)
+      }
+    
+
+    })
+    .catch(err => showAlert(err.message,true) )
+  }
+
+  // method to fetch all the transactions
+  const fetchAllSubscriptions = () => {
+    fetch(baseUrl+"/plans/subscriptions",{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": user.token
+      },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data.success)
+      {
+
+        setTransactions(data.subscriptions)
+      }
+      else
+      {
+   
+        showAlert(data.message,true)
+      }
+    })
+    .catch(() => {
+      showAlert("Failed to fetch transactions ",true)
+    })
+  }
+
   return (
-    <AppContext.Provider value={{login,signup,logout,loading,user,showAlert,addSubscriptionDetialsToDatabase,baseUrl}}>
+    <AppContext.Provider value={{login,signup,logout,loading,user,showAlert,addSubscriptionDetialsToDatabase,baseUrl,cancelSubscription,fetchAllSubscriptions,transactions}}>
 
         <ToastContainer />
         <div className="App">
