@@ -32,7 +32,7 @@ export default function PaymentCard() {
     const [address,setAddress] = useState("")
     const stripe = useStripe()
     const elements = useElements()
-    const {user,showAlert,addSubscriptionDetialsToDatabase} = useContext(AppContext)
+    const {user,showAlert,addSubscriptionDetialsToDatabase,baseUrl} = useContext(AppContext)
     const navigate = useNavigate();
     const [loading,setLoading] = useState(false)
 
@@ -65,7 +65,7 @@ export default function PaymentCard() {
         }
 
         // make request to backend with generated payment method and other detials for starting subscription
-        fetch('http://localhost:3001/plans/subscribe',{
+        fetch(baseUrl+'/plans/subscribe',{
             method: "POST",
             body: JSON.stringify( 
                 {'payment_method': result.paymentMethod.id, 

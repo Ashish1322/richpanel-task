@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext} from "react";
 import "./plan.css";
-
+import { AppContext } from "../../utils/AppContext";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -10,9 +10,10 @@ export default function Plans({ change }) {
   const [selectedPlan, setPlan] = useState("Basic");
 
   const navigate = useNavigate();
+  const {baseUrl}  = useContext(AppContext)
 
   useEffect(() => {
-    fetch("http://localhost:3001/plans/fetch-all-plans")
+    fetch(baseUrl+"/plans/fetch-all-plans")
     .then((res) => res.json())
     .then((data) =>  setPlans(data.plans))
   }, []);
@@ -81,6 +82,17 @@ export default function Plans({ change }) {
             <div
               onClick={setPlanName}
               style={
+                selectedPlan === "Mobile"
+                  ? { backgroundColor: "#1e4d90", opacity: 1 }
+                  : {}
+              }
+            >Mobile
+            </div>
+          </th>
+          <th className="box__head">
+            <div
+              onClick={setPlanName}
+              style={
                 selectedPlan === "Basic"
                   ? { backgroundColor: "#1e4d90", opacity: 1 }
                   : {}
@@ -110,22 +122,20 @@ export default function Plans({ change }) {
             >Premium
             </div>
           </th>
-          <th className="box__head">
-            <div
-              onClick={setPlanName}
-              style={
-                selectedPlan === "Regular"
-                  ? { backgroundColor: "#1e4d90", opacity: 1 }
-                  : {}
-              }
-            >Regular
-            </div>
-          </th>
         </tr>
 
         {togggle === "month" ? (
           <tr>
             <td>Monthly Price</td>
+            <td
+              style={
+                selectedPlan === "Mobile"
+                  ? { color: "#1e4d90", fontWeight: "bold" }
+                  : {}
+              }
+            >
+              &#8377; {plans.mobile["Monthly-Price"]}
+            </td>
             <td
               style={
                 selectedPlan === "Basic"
@@ -153,19 +163,19 @@ export default function Plans({ change }) {
             >
               &#8377; {plans.premium["Monthly-Price"]}
             </td>
-            <td
-              style={
-                selectedPlan === "Regular"
-                  ? { color: "#1e4d90", fontWeight: "bold" }
-                  : {}
-              }
-            >
-              &#8377; {plans.regular["Monthly-Price"]}
-            </td>
           </tr>
         ) : (
           <tr>
             <td>Yearly Price</td>
+            <td
+              style={
+                selectedPlan === "Mobile"
+                  ? { color: "#1e4d90", fontWeight: "bold" }
+                  : {}
+              }
+            >
+              &#8377; {plans.mobile["Yearly-Price"]}
+            </td>
             <td
               style={
                 selectedPlan === "Basic"
@@ -193,20 +203,20 @@ export default function Plans({ change }) {
             >
               &#8377; {plans.premium["Yearly-Price"]}
             </td>
-            <td
-              style={
-                selectedPlan === "Regular"
-                  ? { color: "#1e4d90", fontWeight: "bold" }
-                  : {}
-              }
-            >
-              &#8377; {plans.regular["Yearly-Price"]}
-            </td>
           </tr>
         )}
 
         <tr>
-          <td>Vidoe Qulaity</td>
+          <td>Video Quality</td>
+          <td
+            style={
+              selectedPlan === "Mobile"
+                ? { color: "#1e4d90", fontWeight: "bold" }
+                : {}
+            }
+          >
+            {plans.mobile["Video-Quality"]}
+          </td>
           <td
             style={
               selectedPlan === "Basic"
@@ -234,18 +244,18 @@ export default function Plans({ change }) {
           >
             {plans.premium["Video-Quality"]}
           </td>
+        </tr>
+        <tr>
+          <td>Resolution</td>
           <td
             style={
-              selectedPlan === "Regular"
+              selectedPlan === "Mobile"
                 ? { color: "#1e4d90", fontWeight: "bold" }
                 : {}
             }
           >
-            {plans.regular["Video-Quality"]}
+            {plans.mobile["Resolution"]}
           </td>
-        </tr>
-        <tr>
-          <td>Resolution</td>
           <td
             style={
               selectedPlan === "Basic"
@@ -273,56 +283,8 @@ export default function Plans({ change }) {
           >
             {plans.premium["Resolution"]}
           </td>
-          <td
-            style={
-              selectedPlan === "Regular"
-                ? { color: "#1e4d90", fontWeight: "bold" }
-                : {}
-            }
-          >
-            {plans.regular["Resolution"]}
-          </td>
         </tr>
-        <tr>
-          <td>Number of Active Screens at one Time</td>
-
-          <td
-            style={
-              selectedPlan === "Basic"
-                ? { color: "#1e4d90", fontWeight: "bold" }
-                : {}
-            }
-          >
-            {plans.basic["Number-of-active-screens-at-one-time"]}
-          </td>
-          <td
-            style={
-              selectedPlan === "Standard"
-                ? { color: "#1e4d90", fontWeight: "bold" }
-                : {}
-            }
-          >
-            {plans.standard["Number-of-active-screens-at-one-time"]}
-          </td>
-          <td
-            style={
-              selectedPlan === "Premium"
-                ? { color: "#1e4d90", fontWeight: "bold" }
-                : {}
-            }
-          >
-            {plans.premium["Number-of-active-screens-at-one-time"]}
-          </td>
-          <td
-            style={
-              selectedPlan === "Regular"
-                ? { color: "#1e4d90", fontWeight: "bold" }
-                : {}
-            }
-          >
-            {plans.regular["Number-of-active-screens-at-one-time"]}
-          </td>
-        </tr>
+       
 
         <tr>
           <td id="watch">
@@ -333,27 +295,27 @@ export default function Plans({ change }) {
           </td>
           <td id="two">
             <p style={{ visibility: "visible" }}>Phone</p>
-            <p>Tablet</p>
+            <p style={{ visibility: "visible" }}>Tablet</p>
             <p>tab</p>
             <p>tab</p>
           </td>
           <td>
             <p>Phone</p>
             <p>Tablet</p>
-            <p style={{ visibility: "hidden" }}>Computer</p>
-            <p style={{ visibility: "hidden" }}>TV</p>
+            <p >Computer</p>
+            <p >TV</p>
           </td>
           <td>
             <p>Phone</p>
             <p>Tablet</p>
             <p>Computer</p>
-            <p style={{ visibility: "hidden" }}>TV</p>
+            <p >TV</p>
           </td>
           <td>
             <p>Phone</p>
             <p>Tablet</p>
-            <p>TV</p>
-            <p style={{ visibility: "hidden" }}>TV</p>
+            <p>Computer</p>
+            <p >TV</p>
           </td>
         </tr>
       </table>

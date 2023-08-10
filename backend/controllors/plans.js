@@ -4,19 +4,19 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 const Subscription = require("../modals/subscription")
 
 const StripePlansIds = {
-   "basic": {
+   "mobile": {
       "month": "price_1NascrSDr67aca5VyqHubbHr",
       "year": "price_1NascrSDr67aca5VHQzZIqb7"
    },
-   "standard":{
+   "basic":{
       "month": "price_1NasdqSDr67aca5Vt5jR4s6a",
       "year":"price_1NasdrSDr67aca5V1YQY1EWS"
    },
-   "premium":{
+   "standard":{
       "month": "price_1NasekSDr67aca5V3RfuBCrl",
       "year":"price_1NasekSDr67aca5VIt6GoTPK"
    },
-   "regular":{
+   "premium":{
       "month":"price_1NasfqSDr67aca5VJh1wfnrs",
       "year":"price_1NasfqSDr67aca5VWjFOyPFf"
    }
@@ -41,7 +41,7 @@ const startSubscription = async (req,res) => {
 
    const planId = StripePlansIds[planname][period]
 
-
+   console.log(planId)
    // Create customer with provided email
    const customer = await stripe.customers.create({
       payment_method: payment_method,
@@ -58,6 +58,7 @@ const startSubscription = async (req,res) => {
       expand: ['latest_invoice.payment_intent']
     });
    
+
 
    const status = subscription['latest_invoice']['payment_intent']['status'] 
    const client_secret = subscription['latest_invoice']['payment_intent']['client_secret']
@@ -101,7 +102,7 @@ const cancelSubscription =  (req,res) => {
 
    const subscriptionId  = req.params.subsId;
 
-   console.log(subscriptionId)
+
    // find the subscription of given user with given subscriptionId
    Subscription.findOne({user: req.user._id, subscriptionId})
    .then( async (subs) => {
